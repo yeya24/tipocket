@@ -1,0 +1,77 @@
+metadata:
+  name: tipocket-scbank2
+  namespace: argo
+spec:
+  templates:
+    - name: tipocket-scbank2
+      inputs:
+        parameters:
+          - name: ns
+            default: tipocket-scbank2
+          - name: purge
+            default: "false"
+          - name: hub
+            default: hub.pingcap.net
+          - name: repository
+            default: pingcap
+          - name: image_version
+            default: nightly
+          - name: tidb_image
+            default: nightly
+          - name: tikv_image
+            default: nightly
+          - name: pd_image
+            default: nightly
+          - name: storage_class
+            default: standard
+          - name: run_time
+            default: "5h"
+          - name: nemesis
+            default: "random_kill,kill_pd_leader_5min,partition_one,subcritical_skews,big_skews,shuffle-leader-scheduler,shuffle-region-scheduler,random-merge-scheduler"
+          - name: loki-addr
+            default: http://loki.loki.svc
+          - name: loki-username
+            default: ""
+          - name: loki-password
+            default: ""
+          - name: tidb_config
+            default: ""
+          - name: tikv_config
+            default: ""
+          - name: pd_config
+            default: ""
+          - name: tikv-replicas
+            default: "3"
+          - name: tidb-replica-read
+            default: "leader"
+      metadata:
+        labels:
+          ns: "{{inputs.parameters.ns}}"
+      container:
+        name: tipocket
+        image: 'pingcap/tipocket:latest'
+        imagePullPolicy: Always
+        command:
+          - sh
+          - '-c'
+          - |
+            /bin/bank2 \
+            -namespace={{inputs.parameters.ns}} \
+            -hub={{inputs.parameters.hub}} \
+            -tidb-image={{inputs.parameters.tidb_image}} \
+            -tikv-image={{inputs.parameters.tikv_image}} \
+            -pd-image={{inputs.parameters.pd_image}} \
+            -repository={{inputs.parameters.repository}} \
+            -storage-class={{inputs.parameters.storage_class}} \
+            -run-time={{inputs.parameters.run_time}} \
+            -image-version={{inputs.parameters.image_version}} \
+            -purge={{inputs.parameters.purge}} \
+            -tidb-config={{inputs.parameters.tidb_config}} \
+            -tikv-config={{inputs.parameters.tikv_config}} \
+            -pd-config={{inputs.parameters.pd_config}} \
+            -nemesis={{inputs.parameters.nemesis}} \
+            -tikv-replicas={{inputs.parameters.tikv-replicas}} \
+            -loki-addr={{inputs.parameters.loki-addr}} \
+            -loki-username={{inputs.parameters.loki-username}} \
+            -loki-password={{inputs.parameters.loki-password}} \
+            -tidb-replica-read={{inputs.parameters.tidb-replica-read}}

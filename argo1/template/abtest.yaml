@@ -1,0 +1,92 @@
+metadata:
+  name: tipocket-abtest
+  namespace: argo
+spec:
+  templates:
+    - name: tipocket-abtest
+      inputs:
+        parameters:
+          - name: ns
+            default: tipocket-abtest
+          - name: purge
+            default: "false"
+          - name: hub
+            default: hub.pingcap.net
+          - name: repository
+            default: pingcap
+          - name: image_version
+            default: nightly
+          - name: tidb_image
+            default: nightly
+          - name: tikv_image
+            default: nightly
+          - name: pd_image
+            default: nightly
+          - name: abtest_version
+            value: latest
+          - name: storage_class
+            default: standard
+          - name: nemesis
+            default: ""
+          - name: client
+            default: "2"
+          - name: run_time
+            default: "48h"
+          - name: tidb_config
+            default: ""
+          - name: tikv_config
+            default: ""
+          - name: pd_config
+            default: ""
+          - name: abtest_tidb_config
+            default: ""
+          - name: abtest_tikv_config
+            default: ""
+          - name: abtest_pd_config
+            default: ""
+          - name: abtest_concurrency
+            default: "3"
+          - name: abtest_general_log
+            default: "true"
+          - name: loki-addr
+            default: http://loki.loki.svc
+          - name: loki-username
+            default: ""
+          - name: loki-password
+            default: ""
+      metadata:
+        labels:
+          ns: "{{inputs.parameters.ns}}"
+      container:
+        name: tipocket
+        image: 'pingcap/tipocket:latest'
+        imagePullPolicy: Always
+        command:
+          - sh
+          - '-c'
+          - |
+            /bin/abtest \
+            -namespace={{inputs.parameters.ns}} \
+            -hub={{inputs.parameters.hub}} \
+            -tidb-image={{inputs.parameters.tidb_image}} \
+            -tikv-image={{inputs.parameters.tikv_image}} \
+            -pd-image={{inputs.parameters.pd_image}} \
+            -repository={{inputs.parameters.repository}} \
+            -storage-class={{inputs.parameters.storage_class}} \
+            -image-version={{inputs.parameters.image_version}} \
+            -abtest.image-version={{inputs.parameters.abtest_version}} \
+            -purge={{inputs.parameters.purge}} \
+            -nemesis={{inputs.parameters.nemesis}} \
+            -client={{inputs.parameters.client}} \
+            -run-time={{inputs.parameters.run_time}} \
+            -tidb-config={{inputs.parameters.tidb_config}} \
+            -tikv-config={{inputs.parameters.tikv_config}} \
+            -pd-config={{inputs.parameters.pd_config}} \
+            -abtest.tidb-config={{inputs.parameters.abtest_tidb_config}} \
+            -abtest.tikv-config={{inputs.parameters.abtest_tikv_config}} \
+            -abtest.pd-config={{inputs.parameters.abtest_pd_config}} \
+            -abtest.concurrency={{inputs.parameters.abtest_concurrency}} \
+            -abtest.general-log={{inputs.parameters.abtest_general_log}} \
+            -loki-addr={{inputs.parameters.loki-addr}} \
+            -loki-username={{inputs.parameters.loki-username}} \
+            -loki-password={{inputs.parameters.loki-password}}
