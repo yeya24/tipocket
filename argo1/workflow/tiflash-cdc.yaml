@@ -55,16 +55,6 @@ spec:
       - name: cdc_version
         value: "nightly"
   templates:
-    - name: call-export-logs
-      steps:
-        - - name: call-export-logs
-            templateRef:
-              name: export-logs
-              template: export-logs
-            arguments:
-              parameters:
-                - name: ns
-                  value: "{{workflow.parameters.ns}}"
     - name: call-tipocket-tiflash-cdc
       steps:
         - - name: call-tipocket-tiflash-cdc

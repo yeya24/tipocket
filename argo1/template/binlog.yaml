@@ -37,11 +37,11 @@ spec:
           - name: binlog_sync_timeout
             default: "1h"
           - name: loki-addr
-            default: http://loki.loki.svc
+            default: http://gateway.loki.svc
           - name: loki-username
-            default: ""
+            default: loki
           - name: loki-password
-            default: ""
+            default: admin
       metadata:
         labels:
           ns: "{{inputs.parameters.ns}}"

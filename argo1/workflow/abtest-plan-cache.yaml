@@ -47,16 +47,6 @@ spec:
       - name: abtest_general_log
         value: "true"
   templates:
-    - name: call-export-logs
-      steps:
-        - - name: call-export-logs
-            templateRef:
-              name: export-logs
-              template: export-logs
-            arguments:
-              parameters:
-                - name: ns
-                  value: "{{workflow.parameters.ns}}"
     - name: call-tipocket-abtest
       steps:
         - - name: call-tipocket-abtest

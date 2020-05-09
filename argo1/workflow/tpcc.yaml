@@ -33,16 +33,6 @@ spec:
       - name: round
         value: "10"
   templates:
-    - name: call-export-logs
-      steps:
-        - - name: call-export-logs
-            templateRef:
-              name: export-logs
-              template: export-logs
-            arguments:
-              parameters:
-                - name: ns
-                  value: "{{workflow.parameters.ns}}"
     - name: call-tipocket-tpcc
       steps:
         - - name: call-tipocket-tpcc

@@ -27,16 +27,6 @@ spec:
       - name: run_time
         value: "8h"
   templates:
-    - name: call-export-logs
-      steps:
-        - - name: call-export-logs
-            templateRef:
-              name: export-logs
-              template: export-logs
-            arguments:
-              parameters:
-                - name: ns
-                  value: "{{workflow.parameters.ns}}"
     - name: call-tipocket-sqllogic
       steps:
         - - name: call-tipocket-sqllogic

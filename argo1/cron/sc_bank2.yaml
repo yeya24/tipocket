@@ -47,16 +47,6 @@ spec:
         - name: tidb-replica-read
           value: "leader-and-follower"
     templates:
-      - name: call-export-logs
-        steps:
-          - - name: call-export-logs
-              templateRef:
-                name: export-logs
-                template: export-logs
-              arguments:
-                parameters:
-                  - name: ns
-                    value: "{{workflow.parameters.ns}}"
       - name: call-tipocket-scbank2
         steps:
           - - name: call-tipocket-scbank2
