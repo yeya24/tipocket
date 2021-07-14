@@ -1,6 +1,6 @@
 module github.com/pingcap/tipocket/testcase/rw-register
 
-go 1.15
+go 1.16
 
 require (
 	github.com/pingcap/tipocket v1.0.0
@@ -8,8 +8,6 @@ require (
 )
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
-
-replace github.com/prometheus/prometheus => github.com/prometheus/prometheus v1.8.2-0.20200213233353-b90be6f32a33
 
 replace github.com/uber-go/atomic => go.uber.org/atomic v1.5.0
 

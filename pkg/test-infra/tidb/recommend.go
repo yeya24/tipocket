@@ -24,6 +24,7 @@ import (
 	"github.com/pingcap/tipocket/pkg/test-infra/fixture"
 	"github.com/pingcap/tipocket/pkg/test-infra/util"
 	"github.com/pingcap/tipocket/pkg/tidb-operator/apis/pingcap/v1alpha1"
+	"github.com/pingcap/tipocket/pkg/tidb-operator/util/config"
 )
 
 // Recommendation ...
@@ -47,26 +48,27 @@ func (t *Recommendation) EnablePump(replicas int32) *Recommendation {
 // EnableTiFlash add TiFlash spec in TiDB cluster
 func (t *Recommendation) EnableTiFlash(config fixture.TiDBClusterConfig) {
 	tag, fullImage, replicas := config.ImageVersion, config.TiFlashImage, config.TiFlashReplicas
+	tiflashDataStorageClass := provideTiFlashStorageClassName(config)
 	if t.TidbCluster.Spec.TiFlash == nil {
 		t.TidbCluster.Spec.TiFlash = &v1alpha1.TiFlashSpec{
 			Replicas:         int32(replicas),
-			MaxFailoverCount: pointer.Int32Ptr(0),
+			MaxFailoverCount: pointer.Int32Ptr(int32(0)),
 			ComponentSpec: v1alpha1.ComponentSpec{
 				Image: util.BuildImage("tiflash", tag, fullImage),
 			},
 			StorageClaims: []v1alpha1.StorageClaim{
 				{
-					StorageClassName: &fixture.Context.LocalVolumeStorageClass,
+					StorageClassName: &tiflashDataStorageClass,
 					Resources: fixture.WithStorage(corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							fixture.CPU:    resource.MustParse("1000m"),
-							fixture.Memory: resource.MustParse("2Gi"),
+							fixture.Memory: resource.MustParse("8Gi"),
 						},
 						Limits: corev1.ResourceList{
 							fixture.CPU:    resource.MustParse("4000m"),
 							fixture.Memory: resource.MustParse("16Gi"),
 						},
-					}, "50Gi"),
+					}, "100Gi"),
 				},
 			},
 		}
@@ -126,6 +128,17 @@ func provideTiKVStorageClassName(clusterConfig fixture.TiDBClusterConfig) string
 	return sc
 }
 
+func provideTiFlashStorageClassName(clusterConfig fixture.TiDBClusterConfig) string {
+	sc := fixture.Context.LocalVolumeStorageClass
+	if len(fixture.Context.TiDBClusterConfig.TiFlashStorageClassName) > 0 {
+		sc = fixture.Context.TiDBClusterConfig.TiFlashStorageClassName
+	}
+	if len(clusterConfig.TiFlashStorageClassName) > 0 {
+		sc = clusterConfig.TiFlashStorageClassName
+	}
+	return sc
+}
+
 // RecommendedTiDBCluster does a recommendation, tidb-operator do not have same defaults yet
 func RecommendedTiDBCluster(ns, name string, clusterConfig fixture.TiDBClusterConfig) *Recommendation {
 	enablePVReclaim, exposeStatus := true, true
@@ -168,7 +181,7 @@ func RecommendedTiDBCluster(ns, name string, clusterConfig fixture.TiDBClusterCo
 					ResourceRequirements: fixture.WithStorage(corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							fixture.CPU:    resource.MustParse("500m"),
-							fixture.Memory: resource.MustParse("4Gi"),
+							fixture.Memory: resource.MustParse("1Gi"),
 						},
 						Limits: corev1.ResourceList{
 							fixture.CPU:    resource.MustParse("1000m"),
@@ -186,11 +199,11 @@ func RecommendedTiDBCluster(ns, name string, clusterConfig fixture.TiDBClusterCo
 					Replicas: int32(clusterConfig.TiDBReplicas),
 					ResourceRequirements: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
-							fixture.CPU:    resource.MustParse("1000m"),
-							fixture.Memory: resource.MustParse("1Gi"),
+							fixture.CPU:    resource.MustParse("500m"),
+							fixture.Memory: resource.MustParse("512Mi"),
 						},
 						Limits: corev1.ResourceList{
-							fixture.CPU:    resource.MustParse("1000m"),
+							fixture.CPU:    resource.MustParse("8000m"),
 							fixture.Memory: resource.MustParse("16Gi"),
 						},
 					},
@@ -228,11 +241,14 @@ func RecommendedTiDBCluster(ns, name string, clusterConfig fixture.TiDBClusterCo
 							fixture.Memory: resource.MustParse("8Gi"),
 						},
 					},
-					Config: &v1alpha1.TiCDCConfig{
-						Timezone: &fixture.Context.CDCConfig.Timezone,
-						LogLevel: &fixture.Context.CDCConfig.LogLevel,
-						// FIXME(@mahjonp): tidb-operator haven't supported StorageVolume claims now.
-						LogFile: &fixture.Context.CDCConfig.LogFile,
+					Config: &v1alpha1.CDCConfigWraper{
+						GenericConfig: &config.GenericConfig{
+							MP: map[string]interface{}{
+								"timezone": fixture.Context.CDCConfig.Timezone,
+								"logLevel": fixture.Context.CDCConfig.LogLevel,
+								"logFile":  fixture.Context.CDCConfig.LogFile,
+							},
+						},
 					},
 				},
 			},
